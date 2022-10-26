@@ -22,4 +22,5 @@ public class fondo : MonoBehaviour
         meshRenderer.materials[1].SetTextureOffset("_MainTex", new Vector2(0, Time.time * velocidadMedio));
         meshRenderer.materials[2].SetTextureOffset("_MainTex", new Vector2(0, Time.time * velocidadFrente));
     }
+
 }
