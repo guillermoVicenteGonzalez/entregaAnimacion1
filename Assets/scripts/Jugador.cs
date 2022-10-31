@@ -2,18 +2,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(Animator), typeof(AudioSource))]
 public class Jugador : MonoBehaviour
 {
     [SerializeField] private float velocidad = .7f;
     private Transform trans;
     protected Animator anim;
     [SerializeField] private GameObject normalBulletPrefab;
+    protected AudioSource audioS;
+    protected jugadorModelo jugadorModelo;
+
 
     void Start()
     {
         trans = GetComponent<Transform>();
         anim = GetComponent<Animator>();
+        audioS = GetComponent<AudioSource>();
+        jugadorModelo = new jugadorModelo();
+        jugadorModelo.pVelocidad = velocidad;
     }
 
     // Update is called once per frame
@@ -35,6 +41,7 @@ public class Jugador : MonoBehaviour
         else
         {
             anim.SetBool("disparar", false);
+            audioS.loop = false;
         }
 
         mover(vector2);
@@ -59,10 +66,24 @@ public class Jugador : MonoBehaviour
         trans.position = new Vector2(vector2.x, vector2.y);
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag.Equals("Enemigo"))
+            jugadorModelo.pVida -= 20;
+
+        if (jugadorModelo.pVida < 0)
+            Destroy(gameObject);
+    }
+
     //lo pongo asi para no disparar solo la bala normal y añadir mas balas mas adelante
     void disparar(GameObject prefab)
     {
         Instantiate(prefab, new Vector2(trans.GetChild(0).position.x, trans.GetChild(0).position.y), Quaternion.identity);
         Instantiate(prefab, new Vector2(trans.GetChild(1).position.x, trans.GetChild(1).position.y), Quaternion.identity);
+        if(audioS.loop == false)
+        {
+            audioS.loop = true;
+            audioS.Play();
+        }
     }
 }
