@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
 public class Enemigo : MonoBehaviour
@@ -12,6 +14,7 @@ public class Enemigo : MonoBehaviour
     protected SpriteRenderer spriteRender;
     protected EnemigoModelo enemigoModelo;
     private manager mg;
+    private Collider2D collider;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -20,6 +23,7 @@ public class Enemigo : MonoBehaviour
         spriteRender = GetComponent<SpriteRenderer>();
         enemigoModelo = new EnemigoModelo();
         mg = FindObjectOfType<manager>();
+        collider = GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
@@ -48,17 +52,23 @@ public class Enemigo : MonoBehaviour
 
         if(enemigoModelo.pVida <= 0 || collision.gameObject.name.StartsWith("jugador"))
         {
-            mg.restarAvionesActuales();
-            Collider2D collider = GetComponent<Collider2D>();
             collider.enabled = false;
+            mg.restarAvionesActuales();
             Animator animator = GetComponent<Animator>();
             animator.SetBool("explosion", true);
+            Jugador jugador;
+            jugador = GameObject.Find("jugador").GetComponent<Jugador>();
+            jugador.getJugador().pPuntuacion +=5;
+            
+            TMP_Text textPuntuacion = GameObject.Find("puntuacion").GetComponent<TMP_Text>();
+            textPuntuacion.text = "Puntuacion: " + jugador.getJugador().pPuntuacion;
+            
+    
         }
     }
 
     public void destruirInstancia()
     {
-        
         Destroy(gameObject);
     }
 

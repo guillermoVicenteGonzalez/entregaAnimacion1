@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(Animator), typeof(AudioSource))]
 public class Jugador : MonoBehaviour
@@ -11,8 +12,13 @@ public class Jugador : MonoBehaviour
     [SerializeField] private GameObject normalBulletPrefab;
     protected AudioSource audioS;
     protected jugadorModelo jugadorModelo;
+    public Image imageVida;
 
 
+    public jugadorModelo getJugador()
+    {
+        return jugadorModelo;
+    }
     void Start()
     {
         trans = GetComponent<Transform>();
@@ -69,7 +75,10 @@ public class Jugador : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag.Equals("Enemigo"))
+        {
             jugadorModelo.pVida -= 20;
+            imageVida.rectTransform.sizeDelta = new Vector2(jugadorModelo.pVida, imageVida.rectTransform.sizeDelta.y);
+        }
 
         if (jugadorModelo.pVida < 0)
             Destroy(gameObject);
