@@ -4,26 +4,44 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+public enum EnemyState
+{
+    waiting,
+    ready
+};
 [RequireComponent(typeof(Rigidbody2D), typeof(SpriteRenderer))]
 public class Enemigo : MonoBehaviour
 {
-
+    public Transform shootPoint;
+    public GameObject bulletPrefab;
+    public EnemyState enemyState = EnemyState.ready;
     public float velocidad = .2f;
     protected Rigidbody2D rb;
     protected Transform trans;
     protected SpriteRenderer spriteRender;
     protected EnemigoModelo enemigoModelo;
     private manager mg;
-    private Collider2D collider;
+    private Collider2D colisiones;
+    public bool dañando = false;
+    public ParticleSystem particulas;
+
+    //audio
+    public AudioSource audioSource;
+    public AudioClip shootSound;
+    public AudioClip explosion;
+
+
     void Start()
     {
+        particulas = GetComponent<ParticleSystem>();
         rb = GetComponent<Rigidbody2D>();
         rb.velocity = new Vector2(0, -velocidad);
         trans = GetComponent<Transform>();
         spriteRender = GetComponent<SpriteRenderer>();
         enemigoModelo = new EnemigoModelo();
         mg = FindObjectOfType<manager>();
-        collider = GetComponent<Collider2D>();
+        colisiones = GetComponent<Collider2D>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -36,6 +54,11 @@ public class Enemigo : MonoBehaviour
             mg.restarAvionesActuales();
             Destroy(this.gameObject);
         }
+
+        if(enemyState == EnemyState.ready)
+        {
+            disparar();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -43,30 +66,42 @@ public class Enemigo : MonoBehaviour
         //cambiar esto para contemplar todas las habilidades.
         //podria ser tag player bullet por ejemplo
         if (collision.gameObject.name.StartsWith("normalBullet"))
-        {
-            enemigoModelo.pVida -=1;
-            Debug.Log(enemigoModelo.pVida);
-            //aqui podriamos iniciar el metodo "explota" y enseñar la animacion
-            Destroy(collision.gameObject);
+        {          
+                enemigoModelo.pVida -=5;
+                Debug.Log(enemigoModelo.pVida);
+                //aqui podriamos iniciar el metodo "explota" y enseñar la animacion
+                Destroy(collision.gameObject);
+                particulas.Emit(1);
         }
 
         if(enemigoModelo.pVida <= 0 || collision.gameObject.name.StartsWith("jugador"))
         {
-            collider.enabled = false;
-            mg.restarAvionesActuales();
-            Animator animator = GetComponent<Animator>();
-            animator.SetBool("explosion", true);
-            Jugador jugador;
-            jugador = GameObject.Find("jugador").GetComponent<Jugador>();
-            jugador.getJugador().pPuntuacion +=5;
-            
-            TMP_Text textPuntuacion = GameObject.Find("puntuacion").GetComponent<TMP_Text>();
-            textPuntuacion.text = "Puntuacion: " + jugador.getJugador().pPuntuacion;
-            
+            colisiones.enabled = false;
+            if (!dañando)
+            {
+                dañando = true;
+                audioSource.PlayOneShot(explosion);
+                mg.restarAvionesActuales();
+                Animator animator = GetComponent<Animator>();
+                animator.SetBool("explosion", true);
+                Jugador jugador;
+                jugador = GameObject.Find("jugador").GetComponent<Jugador>();
+                jugador.getJugador().pPuntuacion +=5;
+
+                TMP_Text textPuntuacion = GameObject.Find("puntuacion").GetComponent<TMP_Text>();
+                textPuntuacion.text = "Puntuacion: " + jugador.getJugador().pPuntuacion;
+            }
+
     
         }
     }
 
+    public IEnumerator Cooldown(float waitTime)
+    {
+        enemyState = EnemyState.waiting;
+        yield return new WaitForSeconds(waitTime);
+        enemyState = EnemyState.ready;
+    }
     public void destruirInstancia()
     {
         Destroy(gameObject);
@@ -74,6 +109,9 @@ public class Enemigo : MonoBehaviour
 
     void disparar()
     {
-
+        float waitTime = Random.Range(2, 4);
+        audioSource.PlayOneShot(shootSound);
+        Instantiate(bulletPrefab, shootPoint.position, Quaternion.AngleAxis(180,Vector3.right));
+        StartCoroutine(Cooldown(waitTime));
     }
 }

@@ -28,3 +28,4 @@ public class normalBullet : MonoBehaviour
             Destroy(this.gameObject);
     }
 }
+
