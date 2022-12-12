@@ -1,23 +1,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+
 public class manager : MonoBehaviour
 {
     public GameObject gameObjectEnemigo;
+    public jugadorModelo jugadorModelo;
     private IEnumerator corutina;
     [SerializeField] float maxTotalAviones;
     private float nAvionesActual=0;
+    [SerializeField] int goal;
+    [SerializeField] private menuManager menuManager;
     // Use this for initialization
     void Start()
     {
+        menuManager = FindObjectOfType<menuManager>();
         corutina = coroutinaAvisiones(2);
         StartCoroutine(corutina);
-        Debug.Log("Creo aviones " + Time.time);
+        //Debug.Log("Creo aviones " + Time.time);
+        jugadorModelo = GameObject.Find("jugador").GetComponent<Jugador>().getJugador();
     }
 
     private void Update()
     {
-        Debug.Log("aviones actuales: " + nAvionesActual);
+        //Debug.Log("aviones actuales: " + nAvionesActual);
+        if(jugadorModelo.pPuntuacion >= goal)
+        {
+            //SceneManager.LoadScene("boss");
+            menuManager.loadScene("boss");
+        }
     }
     private IEnumerator coroutinaAvisiones(float waitTime)
     {
@@ -44,7 +56,7 @@ public class manager : MonoBehaviour
                     nAvionesActual++;
                 }
             }
-            Debug.Log(waitTime);
+            //Debug.Log(waitTime);
             yield return new WaitForSeconds(waitTime);
         }
     }

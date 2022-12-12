@@ -30,6 +30,9 @@ public class Enemigo : MonoBehaviour
     public AudioClip shootSound;
     public AudioClip explosion;
 
+    //vida
+    public GameObject healthPrefab;
+
 
     void Start()
     {
@@ -51,7 +54,8 @@ public class Enemigo : MonoBehaviour
         Vector2 vector2max = Camera.main.ViewportToWorldPoint(new Vector2(1, 1));
         if (vector2min.y > spriteRender.bounds.max.y)
         {
-            mg.restarAvionesActuales();
+            if(mg != null)
+                mg.restarAvionesActuales();
             Destroy(this.gameObject);
         }
 
@@ -80,19 +84,36 @@ public class Enemigo : MonoBehaviour
             if (!dañando)
             {
                 dañando = true;
-                audioSource.PlayOneShot(explosion);
-                mg.restarAvionesActuales();
-                Animator animator = GetComponent<Animator>();
-                animator.SetBool("explosion", true);
-                Jugador jugador;
-                jugador = GameObject.Find("jugador").GetComponent<Jugador>();
-                jugador.getJugador().pPuntuacion +=5;
-
-                TMP_Text textPuntuacion = GameObject.Find("puntuacion").GetComponent<TMP_Text>();
-                textPuntuacion.text = "Puntuacion: " + jugador.getJugador().pPuntuacion;
+                enemigoMorir();
+           
             }
+        }
+    }
 
-    
+    public void enemigoMorir()
+    {
+        leaveCure();
+        audioSource.PlayOneShot(explosion);
+        if(mg != null)
+        {
+            mg.restarAvionesActuales();
+        }
+        Animator animator = GetComponent<Animator>();
+        animator.SetBool("explosion", true);
+        Jugador jugador;
+        jugador = GameObject.Find("jugador").GetComponent<Jugador>();
+        jugador.getJugador().pPuntuacion +=5;
+
+        TMP_Text textPuntuacion = GameObject.Find("puntuacion").GetComponent<TMP_Text>();
+        textPuntuacion.text = "Puntuacion: " + jugador.getJugador().pPuntuacion;
+    }
+
+    private void leaveCure()
+    {
+        int result = Random.Range(0, 9);
+        if(result == 1)
+        {
+            Instantiate(healthPrefab, trans.position,Quaternion.identity);
         }
     }
 

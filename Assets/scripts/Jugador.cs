@@ -17,7 +17,6 @@ public class Jugador : MonoBehaviour
     [SerializeField] private PlayerState playerState = PlayerState.idle;
     private Transform trans;
     protected Animator anim;
-    [SerializeField] private GameObject normalBulletPrefab;
     protected jugadorModelo jugadorModelo;
     public vidaHandler vidaHandler;
     public Animator cameraAnimator;
@@ -30,6 +29,17 @@ public class Jugador : MonoBehaviour
     //particulas
     ParticleSystem particulas;
 
+    [SerializeField] private GameObject barreraGO;
+    //prefabs
+    [SerializeField] private GameObject normalBulletPrefab;
+
+    //cooldowns habilidades
+    [SerializeField] private bool barrierCD = true;
+    [SerializeField] private coolDownScript cdScriptBarrier;
+
+    //pantalla game over
+    [SerializeField] private GameObject gameOver;
+
 
 
     public jugadorModelo getJugador()
@@ -39,7 +49,6 @@ public class Jugador : MonoBehaviour
     void Start()
     {
         particulas = GetComponent<ParticleSystem>();
-        DontDestroyOnLoad(this);
         trans = GetComponent<Transform>();
         anim = GetComponent<Animator>();
         audioS = GetComponent<AudioSource>();
@@ -73,6 +82,12 @@ public class Jugador : MonoBehaviour
             audioS.loop = false;
         }
 
+        if (Input.GetAxisRaw("Fire2") == 1)
+        {
+            //Debug.Log("presiona");
+            StartCoroutine(barrier(7));
+        }
+
         mover(vector2);
     }
 
@@ -99,27 +114,40 @@ public class Jugador : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag.Equals("Enemigo"))
+        if (collision.gameObject.tag.Equals("Enemigo") || collision.CompareTag("boss"))
         {
-            jugadorModelo.pVida -= 20;
-            vidaHandler.setVida(jugadorModelo.pVida);
+            //jugadorModelo.pVida -= 20;
+            //vidaHandler.setVida(jugadorModelo.pVida);
+            changeHealth(-20);
             cameraAnimator.SetTrigger("golpe");
             audioS.PlayOneShot(golpe);
             //imageVida.rectTransform.sizeDelta = new Vector2(jugadorModelo.pVida, imageVida.rectTransform.sizeDelta.y);
         }
 
-        if (collision.CompareTag("enemyBullet"))
+        if (collision.CompareTag("bigEnemyBullet"))
         {
-            jugadorModelo.pVida -= 5;
-            vidaHandler.setVida(jugadorModelo.pVida);
+            changeHealth(-20);
             cameraAnimator.SetTrigger("golpe");
             audioS.PlayOneShot(golpe);
             Destroy(collision.gameObject);
             particulas.Emit(7);
         }
 
+        if (collision.CompareTag("enemyBullet"))
+        {
+            //jugadorModelo.pVida -= 5;
+            //vidaHandler.setVida(jugadorModelo.pVida);
+            changeHealth(-5);
+            cameraAnimator.SetTrigger("golpe");
+            audioS.PlayOneShot(golpe);
+            Destroy(collision.gameObject);
+            particulas.Emit(7);
+        }
+
+
         if (jugadorModelo.pVida <= 0)
         {
+            gameOver.SetActive(true);
             playerState = PlayerState.dead;
             audioS.PlayOneShot(explosion);
             gameObject.GetComponent<Collider2D>().enabled = false;
@@ -127,6 +155,20 @@ public class Jugador : MonoBehaviour
             //Destroy(gameObject);
         }
             
+    }
+
+    public void changeHealth(int value)
+    {
+        if(jugadorModelo.pVida + value <= jugadorModelo.pMaxVida)
+        {
+            jugadorModelo.pVida += value;
+
+        }
+        else
+        {
+            jugadorModelo.pVida = jugadorModelo.pMaxVida;
+        }
+        vidaHandler.setVida(jugadorModelo.pVida);
     }
 
     public void morir()
@@ -148,4 +190,29 @@ public class Jugador : MonoBehaviour
             }
         }
     }
+
+
+    
+
+    private IEnumerator barrier(float cooldown)
+    {
+
+        if (barrierCD)
+        {
+            barrierCD = false;
+            barreraGO.SetActive(true);
+            yield return new WaitForSeconds(3f);
+            barreraGO.GetComponent<barrierScript>().exitAnimation();
+            yield return new WaitForSeconds(.3f);
+            barreraGO.SetActive(false);
+            cdScriptBarrier. iniciarCoolDown(cooldown);
+            yield return new WaitForSeconds(cooldown);
+            barrierCD = true;
+            Debug.Log("barrera ready");
+        }
+    }
+
+
+
+ 
 }

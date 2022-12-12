@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class jugadorModelo 
 {
+    protected int maxVida = 100;
     protected int vida = 100;
     protected int puntuacion = 0;
     protected float velocidad;
@@ -24,5 +25,11 @@ public class jugadorModelo
     {
         get { return velocidad; }
         set { velocidad = value; }
+    }
+
+    public int pMaxVida
+    {
+        get { return maxVida; }
+        set { maxVida = value; }
     }
 }

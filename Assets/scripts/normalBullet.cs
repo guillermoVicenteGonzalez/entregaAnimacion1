@@ -24,7 +24,7 @@ public class normalBullet : MonoBehaviour
         Vector2 vector2min = Camera.main.ViewportToWorldPoint(new Vector2(0, 0));
         Vector2 vector2max = Camera.main.ViewportToWorldPoint(new Vector2(1, 1));
         //tengo en cuanta el borde inferior del sprite
-        if (vector2max.y < spriteRenderer.bounds.min.y)
+        if (vector2max.y < spriteRenderer.bounds.min.y || vector2min.y > spriteRenderer.bounds.min.y)
             Destroy(this.gameObject);
     }
 }

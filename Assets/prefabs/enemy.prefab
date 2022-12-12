@@ -220,6 +220,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   shootSound: {fileID: 8300000, guid: 1743f0d445b86480b8ecfdbc8c84a5f9, type: 3}
   explosion: {fileID: 8300000, guid: cc7da5800bd3b4cb4b196ef674bee2e5, type: 3}
+  healthPrefab: {fileID: 7130684284793184728, guid: 53caf66650d08114d8298238cc54dadd, type: 3}
 --- !u!198 &5099623909922536193
 ParticleSystem:
   m_ObjectHideFlags: 0
